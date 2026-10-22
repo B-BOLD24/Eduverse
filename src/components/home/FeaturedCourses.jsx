@@ -1,10 +1,51 @@
-import { courses } from "../../data/courses";
-import { CourseCard } from "../CourseCard";
-import { Route,Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+
+import { apiFetch } from "../../lib/api.js";
+import { CourseCard } from "../CourseCard.jsx";
+
 export const FeaturedCourses = () => {
+  const [courses, setCourses] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  // Fetch courses from our Express API.
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadCourses() {
+      try {
+        const data = await apiFetch("/api/courses?limit=50");
+
+        if (!cancelled) {
+          setCourses(data.courses);
+        }
+      } catch (error) {
+        if (!cancelled) {
+          setError(error.message);
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    }
+
+    loadCourses();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  // Select up to four featured courses.
+  const featuredCourses = courses
+    .filter((course) => course.featured)
+    .slice(0, 4);
+
   return (
     <>
-      
+      {/* Section heading */}
       <div className="mb-8 flex items-end justify-between gap-4">
         <div>
           <p className="text-sm font-semibold uppercase tracking-wide text-violet-600">
@@ -27,13 +68,27 @@ export const FeaturedCourses = () => {
           View all courses →
         </Link>
       </div>
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-4">
-        {courses
-          .filter((course) => course.featured).slice(0,4)
-          .map((course) => (
+
+      {/* Loading, error, or featured courses */}
+      {loading ? (
+        <p className="py-10 text-center text-slate-600">
+          Loading featured courses...
+        </p>
+      ) : error ? (
+        <p role="alert" className="py-10 text-center text-red-600">
+          Couldn't load featured courses: {error}
+        </p>
+      ) : featuredCourses.length > 0 ? (
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-4">
+          {featuredCourses.map((course) => (
             <CourseCard key={course.id} course={course} />
           ))}
-      </div>
+        </div>
+      ) : (
+        <p className="py-10 text-center text-slate-600">
+          No featured courses available right now.
+        </p>
+      )}
     </>
   );
 };

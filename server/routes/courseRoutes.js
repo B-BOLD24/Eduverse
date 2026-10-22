@@ -5,20 +5,19 @@ const router = Router();
 const escapeRegex = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 router.get("/", async (req, res) => {
   try {
+    const filter = {};
     const search = String(req.query.search ?? "")
       .trim()
       .slice(0, 100);
 
     if (search) {
       const regex = new RegExp(escapeRegex(search), "i");
-      1;
       filter.$or = [
         { title: regex },
         { instructor: regex },
         { category: regex },
       ];
     }
-    const filter = {}; // NEW: starts as an empty object
     const category = String(req.query.category ?? "");
     const level = String(req.query.level ?? "");
 
@@ -88,7 +87,21 @@ router.get("/", async (req, res) => {
       ...course,
     }));
 
-    res.json({ courses: result });
+    const totalPages = Math.ceil(total / limit);
+
+    res.json({
+      courses: result,
+      total,
+      page,
+      limit,
+      totalPages,
+      pagination: {
+        total,
+        page,
+        limit,
+        totalPages,
+      },
+    });
   } catch (error) {
     console.error("Failed to fetch courses:", error.message);
 
@@ -113,10 +126,7 @@ router.get("/:courseId", async (req, res) => {
     const { _id, __v, ...courseData } = course;
 
     res.json({
-      course: {
-        ...courseData,
-        id: id,
-      },
+      course: courseData,
     });
   } catch (error) {
     console.error("Failed to fetch course:", error.message);

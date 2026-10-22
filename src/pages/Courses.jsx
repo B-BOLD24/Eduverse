@@ -1,21 +1,13 @@
-import { useState } from "react";
-import { courses } from "../data/courses";
+import { useEffect, useState } from "react";
+
 import { CourseCard } from "../components/CourseCard";
 import { CoursesNavbar } from "../components/CoursesNavbar";
+import { apiFetch } from "../lib/api.js";
 
-// Six courses per page gives us two rows of three
-// on a large desktop screen.
+// Six courses per page: two rows of three on desktop.
 const PAGE_SIZE = 6;
 
-// Derive the filter options from our course data.
-const categories = [
-  ...new Set(courses.map((course) => course.category)),
-];
-
-const levels = [
-  ...new Set(courses.map((course) => course.level)),
-];
-
+// Shared styles for filter controls.
 const selectClass =
   "w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 outline-none focus:border-violet-500 focus:ring-2 focus:ring-violet-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:focus:ring-violet-900";
 
@@ -23,6 +15,8 @@ const radioClass = "accent-violet-600";
 
 // Reusable filter controls for desktop and mobile.
 const FilterControls = ({
+  categories,
+  levels,
   selectedCategory,
   onCategoryChange,
   selectedLevel,
@@ -35,7 +29,6 @@ const FilterControls = ({
 }) => {
   return (
     <div className="space-y-6">
-
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold text-slate-900 dark:text-white">
           Filters
@@ -82,7 +75,6 @@ const FilterControls = ({
                 onChange={(event) => onCategoryChange(event.target.value)}
                 className={radioClass}
               />
-
               {category}
             </label>
           ))}
@@ -109,14 +101,13 @@ const FilterControls = ({
                 onChange={(event) => onLevelChange(event.target.value)}
                 className={radioClass}
               />
-
               {level === "All" ? "All levels" : level}
             </label>
           ))}
         </div>
       </fieldset>
 
-      {/* Price filter */}
+      {/* Maximum-price filter */}
       <div>
         <label
           htmlFor="price-filter"
@@ -138,7 +129,7 @@ const FilterControls = ({
         </select>
       </div>
 
-      {/* Rating filter */}
+      {/* Minimum-rating filter */}
       <div>
         <label
           htmlFor="rating-filter"
@@ -158,26 +149,159 @@ const FilterControls = ({
           <option value="4.5">4.5 and above</option>
         </select>
       </div>
-
     </div>
   );
 };
 
 export const Courses = () => {
-  // Search and filter state
+  // Courses on the current page, returned by the API.
+  const [courses, setCourses] = useState([]);
+
+  // All fetched courses are used only to build filter options.
+  const [allCourses, setAllCourses] = useState([]);
+
+  const [coursesLoading, setCoursesLoading] = useState(true);
+  const [coursesError, setCoursesError] = useState("");
+
+  // Search and filter selections.
   const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [selectedLevel, setSelectedLevel] = useState("All");
   const [maxPrice, setMaxPrice] = useState("all");
   const [minRating, setMinRating] = useState("0");
 
-  // Sorting, pagination, and UI state
+  // Sorting, pagination and UI state.
   const [sortBy, setSortBy] = useState("popular");
   const [currentPage, setCurrentPage] = useState(1);
+  const [pagination, setPagination] = useState({
+    total: 0,
+    page: 1,
+    limit: PAGE_SIZE,
+    totalPages: 0,
+  });
+
   const [isMobilePanelOpen, setIsMobilePanelOpen] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
 
-  // Reset the current page when filters change.
+  // Derive the available filter options from database data.
+  const categories = [...new Set(allCourses.map((course) => course.category))];
+
+  const levels = [...new Set(allCourses.map((course) => course.level))];
+
+  // Fetch the course list used to populate category and level options.
+  // This runs only when the page mounts.
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadFilterOptions() {
+      try {
+        const data = await apiFetch("/api/courses?limit=50");
+
+        if (!cancelled) {
+          setAllCourses(data.courses ?? []);
+        }
+      } catch (error) {
+        // The main results request displays the API error.
+        console.error("Failed to load course filter options:", error.message);
+      }
+    }
+
+    loadFilterOptions();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  // Debounce search so we don't request results for every keystroke.
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm.trim());
+    }, 300);
+
+    return () => clearTimeout(timeoutId);
+  }, [searchTerm]);
+
+  // Fetch filtered, sorted and paginated results from Express.
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadCourses() {
+      setCoursesLoading(true);
+      setCoursesError("");
+
+      try {
+        // Build the query parameters from the current UI selections.
+        const params = new URLSearchParams();
+
+        if (debouncedSearchTerm) {
+          params.set("search", debouncedSearchTerm);
+        }
+
+        if (selectedCategory !== "All") {
+          params.set("category", selectedCategory);
+        }
+
+        if (selectedLevel !== "All") {
+          params.set("level", selectedLevel);
+        }
+
+        if (maxPrice !== "all") {
+          params.set("maxPrice", maxPrice);
+        }
+
+        if (minRating !== "0") {
+          params.set("minRating", minRating);
+        }
+
+        params.set("sortBy", sortBy);
+        params.set("page", String(currentPage));
+        params.set("limit", String(PAGE_SIZE));
+
+        const data = await apiFetch(`/api/courses?${params.toString()}`);
+
+        if (!cancelled) {
+          setCourses(data.courses ?? []);
+
+          // The backend provides counts for the complete filtered result.
+          setPagination(
+            data.pagination ?? {
+              total: data.courses?.length ?? 0,
+              page: currentPage,
+              limit: PAGE_SIZE,
+              totalPages: Math.ceil((data.courses?.length ?? 0) / PAGE_SIZE),
+            },
+          );
+        }
+      } catch (error) {
+        if (!cancelled) {
+          setCoursesError(error.message);
+          setCourses([]);
+        }
+      } finally {
+        if (!cancelled) {
+          setCoursesLoading(false);
+        }
+      }
+    }
+
+    loadCourses();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    debouncedSearchTerm,
+    selectedCategory,
+    selectedLevel,
+    maxPrice,
+    minRating,
+    sortBy,
+    currentPage,
+  ]);
+
+  // Reset pagination whenever the user changes a filter.
   const changeSearch = (value) => {
     setSearchTerm(value);
     setCurrentPage(1);
@@ -210,6 +334,7 @@ export const Courses = () => {
 
   const clearFilters = () => {
     setSearchTerm("");
+    setDebouncedSearchTerm("");
     setSelectedCategory("All");
     setSelectedLevel("All");
     setMaxPrice("all");
@@ -218,90 +343,22 @@ export const Courses = () => {
     setCurrentPage(1);
   };
 
-  // 1. Filter the course data.
-  const filteredCourses = courses.filter((course) => {
-    const query = searchTerm.trim().toLowerCase();
-
-    const matchesSearch =
-      course.title.toLowerCase().includes(query) ||
-      course.instructor.toLowerCase().includes(query) ||
-      course.category.toLowerCase().includes(query);
-
-    const matchesCategory =
-      selectedCategory === "All" ||
-      course.category === selectedCategory;
-
-    const matchesLevel =
-      selectedLevel === "All" ||
-      course.level === selectedLevel;
-
-    const matchesPrice =
-      maxPrice === "all" ||
-      course.price <= Number(maxPrice);
-
-    const matchesRating =
-      course.rating >= Number(minRating);
-
-    return (
-      matchesSearch &&
-      matchesCategory &&
-      matchesLevel &&
-      matchesPrice &&
-      matchesRating
-    );
-  });
-
-  // 2. Sort the filtered courses without mutating the original array.
-  const sortedCourses = [...filteredCourses].sort((a, b) => {
-    switch (sortBy) {
-      case "popular":
-        return b.students - a.students;
-
-      case "rating":
-        return b.rating - a.rating;
-
-      case "price-low":
-        return a.price - b.price;
-
-      case "price-high":
-        return b.price - a.price;
-
-      default:
-        return 0;
-    }
-  });
-
-  // 3. Work out the current page and select its courses.
-  const totalPages = Math.ceil(sortedCourses.length / PAGE_SIZE);
-  const startIndex = (currentPage - 1) * PAGE_SIZE;
-
-  const pageCourses = sortedCourses.slice(
-    startIndex,
-    startIndex + PAGE_SIZE
-  );
-
+  // Calculate the visible range using the total count from the backend.
   const showingFrom =
-    sortedCourses.length === 0 ? 0 : startIndex + 1;
+    pagination.total === 0 ? 0 : (currentPage - 1) * PAGE_SIZE + 1;
 
-  const showingTo = Math.min(
-    startIndex + PAGE_SIZE,
-    sortedCourses.length
-  );
+  const showingTo = Math.min(currentPage * PAGE_SIZE, pagination.total);
 
   return (
     <div className={isDarkMode ? "dark" : ""}>
       <div className="min-h-screen bg-white text-slate-900 transition-colors dark:bg-slate-950 dark:text-slate-100">
-
         <CoursesNavbar
           onSearchClick={() => setIsMobilePanelOpen(true)}
           isDarkMode={isDarkMode}
-          onToggleTheme={() =>
-            setIsDarkMode((previous) => !previous)
-          }
+          onToggleTheme={() => setIsDarkMode((previous) => !previous)}
         />
 
         <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-
           {/* Page heading */}
           <div className="mb-8">
             <p className="text-sm font-semibold uppercase tracking-wider text-violet-600 dark:text-violet-400">
@@ -313,17 +370,18 @@ export const Courses = () => {
             </h1>
 
             <p className="mt-3 max-w-2xl text-slate-600 dark:text-slate-400">
-              Discover courses, learn from experts, and take your
-              next step towards your goals.
+              Discover courses, learn from experts, and take your next step
+              towards your goals.
             </p>
           </div>
 
           <div className="flex items-start gap-8">
-
             {/* Desktop sidebar */}
             <aside className="hidden w-64 shrink-0 md:block">
               <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
                 <FilterControls
+                  categories={categories}
+                  levels={levels}
                   selectedCategory={selectedCategory}
                   onCategoryChange={changeCategory}
                   selectedLevel={selectedLevel}
@@ -339,10 +397,8 @@ export const Courses = () => {
 
             {/* Course results */}
             <section className="min-w-0 flex-1">
-
               {/* Search and sorting toolbar */}
               <div className="mb-6 flex flex-col gap-4 sm:flex-row">
-
                 <label className="flex min-w-0 flex-1 items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 focus-within:border-violet-500 focus-within:ring-2 focus-within:ring-violet-100 dark:border-slate-700 dark:bg-slate-900 dark:focus-within:ring-violet-900">
                   <svg
                     aria-hidden="true"
@@ -379,16 +435,20 @@ export const Courses = () => {
                     <option value="rating">Highest rated</option>
                     <option value="price-low">Price: low to high</option>
                     <option value="price-high">Price: high to low</option>
+                    <option value="newest">Newest</option>
                   </select>
                 </label>
-
               </div>
 
               {/* Result count */}
               <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
-                <p className="text-sm text-slate-500 dark:text-slate-400">
-                  Showing {showingFrom}–{showingTo} of{" "}
-                  {sortedCourses.length} courses
+                <p
+                  aria-live="polite"
+                  className="text-sm text-slate-500 dark:text-slate-400"
+                >
+                  {coursesLoading
+                    ? "Loading course results..."
+                    : `Showing ${showingFrom}–${showingTo} of ${pagination.total} courses`}
                 </p>
 
                 <button
@@ -400,14 +460,38 @@ export const Courses = () => {
                 </button>
               </div>
 
-              {/* Course cards or empty state */}
-              {pageCourses.length > 0 ? (
+              {/* Loading, error, course cards, or empty state */}
+              {coursesLoading ? (
+                <div className="rounded-2xl border border-slate-200 px-6 py-16 text-center dark:border-slate-800">
+                  <p className="text-slate-600 dark:text-slate-300">
+                    Loading courses...
+                  </p>
+                </div>
+              ) : coursesError ? (
+                <div
+                  role="alert"
+                  className="rounded-2xl border border-red-200 px-6 py-10 text-center dark:border-red-900"
+                >
+                  <h2 className="text-lg font-semibold text-red-600">
+                    Couldn't load courses
+                  </h2>
+
+                  <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">
+                    {coursesError}
+                  </p>
+
+                  <button
+                    type="button"
+                    onClick={() => setCurrentPage((page) => page)}
+                    className="mt-4 rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-800"
+                  >
+                    Retry
+                  </button>
+                </div>
+              ) : courses.length > 0 ? (
                 <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
-                  {pageCourses.map((course) => (
-                    <CourseCard
-                      key={course.id}
-                      course={course}
-                    />
+                  {courses.map((course) => (
+                    <CourseCard key={course.id} course={course} />
                   ))}
                 </div>
               ) : (
@@ -430,65 +514,66 @@ export const Courses = () => {
                 </div>
               )}
 
-              {/* Pagination */}
-              {totalPages > 1 && (
-                <nav
-                  aria-label="Course pagination"
-                  className="mt-10 flex flex-col items-center justify-between gap-4 border-t border-slate-200 pt-6 dark:border-slate-800 sm:flex-row"
-                >
-                  <p className="text-sm text-slate-500 dark:text-slate-400">
-                    Page {currentPage} of {totalPages}
-                  </p>
+              {/* Pagination from the backend */}
+              {!coursesLoading &&
+                !coursesError &&
+                pagination.totalPages > 1 && (
+                  <nav
+                    aria-label="Course pagination"
+                    className="mt-10 flex flex-col items-center justify-between gap-4 border-t border-slate-200 pt-6 dark:border-slate-800 sm:flex-row"
+                  >
+                    <p className="text-sm text-slate-500 dark:text-slate-400">
+                      Page {currentPage} of {pagination.totalPages}
+                    </p>
 
-                  <div className="flex flex-wrap items-center justify-center gap-2">
-
-                    <button
-                      type="button"
-                      disabled={currentPage === 1}
-                      onClick={() =>
-                        setCurrentPage((page) => page - 1)
-                      }
-                      className="rounded-lg border border-slate-200 px-3 py-2 text-sm font-medium hover:bg-violet-50 disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-700 dark:hover:bg-slate-800"
-                    >
-                      Previous
-                    </button>
-
-                    {Array.from(
-                      { length: totalPages },
-                      (_, index) => index + 1
-                    ).map((pageNumber) => (
+                    <div className="flex flex-wrap items-center justify-center gap-2">
                       <button
-                        key={pageNumber}
                         type="button"
-                        aria-current={
-                          currentPage === pageNumber ? "page" : undefined
+                        disabled={currentPage === 1}
+                        onClick={() =>
+                          setCurrentPage((page) => Math.max(1, page - 1))
                         }
-                        onClick={() => setCurrentPage(pageNumber)}
-                        className={`h-10 min-w-10 rounded-lg px-3 text-sm font-semibold transition ${
-                          currentPage === pageNumber
-                            ? "bg-violet-600 text-white"
-                            : "border border-slate-200 text-slate-700 hover:bg-violet-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
-                        }`}
+                        className="rounded-lg border border-slate-200 px-3 py-2 text-sm font-medium hover:bg-violet-50 disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-700 dark:hover:bg-slate-800"
                       >
-                        {pageNumber}
+                        Previous
                       </button>
-                    ))}
 
-                    <button
-                      type="button"
-                      disabled={currentPage === totalPages}
-                      onClick={() =>
-                        setCurrentPage((page) => page + 1)
-                      }
-                      className="rounded-lg border border-slate-200 px-3 py-2 text-sm font-medium hover:bg-violet-50 disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-700 dark:hover:bg-slate-800"
-                    >
-                      Next
-                    </button>
+                      {Array.from(
+                        { length: pagination.totalPages },
+                        (_, index) => index + 1,
+                      ).map((pageNumber) => (
+                        <button
+                          key={pageNumber}
+                          type="button"
+                          aria-current={
+                            currentPage === pageNumber ? "page" : undefined
+                          }
+                          onClick={() => setCurrentPage(pageNumber)}
+                          className={`h-10 min-w-10 rounded-lg px-3 text-sm font-semibold transition ${
+                            currentPage === pageNumber
+                              ? "bg-violet-600 text-white"
+                              : "border border-slate-200 text-slate-700 hover:bg-violet-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
+                          }`}
+                        >
+                          {pageNumber}
+                        </button>
+                      ))}
 
-                  </div>
-                </nav>
-              )}
-
+                      <button
+                        type="button"
+                        disabled={currentPage === pagination.totalPages}
+                        onClick={() =>
+                          setCurrentPage((page) =>
+                            Math.min(pagination.totalPages, page + 1),
+                          )
+                        }
+                        className="rounded-lg border border-slate-200 px-3 py-2 text-sm font-medium hover:bg-violet-50 disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-700 dark:hover:bg-slate-800"
+                      >
+                        Next
+                      </button>
+                    </div>
+                  </nav>
+                )}
             </section>
           </div>
         </main>
@@ -497,7 +582,6 @@ export const Courses = () => {
       {/* Mobile search and filter drawer */}
       {isMobilePanelOpen && (
         <div className="fixed inset-0 z-50 md:hidden">
-
           {/* Clicking the backdrop closes the drawer */}
           <button
             type="button"
@@ -507,7 +591,6 @@ export const Courses = () => {
           />
 
           <aside className="absolute right-0 top-0 h-full w-[min(92vw,380px)] overflow-y-auto bg-white p-5 shadow-2xl dark:bg-slate-900">
-
             <div className="mb-6 flex items-center justify-between">
               <h2 className="text-xl font-bold text-slate-900 dark:text-white">
                 Search and filters
@@ -548,6 +631,8 @@ export const Courses = () => {
             </label>
 
             <FilterControls
+              categories={categories}
+              levels={levels}
               selectedCategory={selectedCategory}
               onCategoryChange={changeCategory}
               selectedLevel={selectedLevel}
@@ -558,7 +643,6 @@ export const Courses = () => {
               onMinRatingChange={changeMinRating}
               onClear={clearFilters}
             />
-
           </aside>
         </div>
       )}

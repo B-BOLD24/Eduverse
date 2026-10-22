@@ -3,10 +3,21 @@ import toggle from "../assets/toggle.svg";
 import menu from "../assets/menu.svg";
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext.jsx";
 export const Navbar = () => {
   const [menuToggle, setMenuToggle] = useState(false);
   const closeMenu = () => setMenuToggle(false);
-
+  const { user, authLoading, logout } = useAuth();
+  const navigate = useNavigate();
+  async function handleLogout() {
+    try {
+      await logout();
+      navigate("/");
+    } catch (error) {
+      console.error("Logout failed:", error.message);
+    }
+  }
   return (
     <>
       <div className="flex h-10 w-full bg-white-300  ">
@@ -52,13 +63,35 @@ export const Navbar = () => {
               className="h-full w-full object-contain "
             />
           </div>
-          <div className="p-2">
+          {!authLoading &&
+            (user ? (
+              <>
+                <div className="p-2">
+                  <Link to="/my-learning">My Learning</Link>
+                </div>
+
+                <span>{user.name}</span>
+
+                <button onClick={handleLogout}>Log out</button>
+              </>
+            ) : (
+              <>
+                <div className="p-2">
+                  <Link to="/login">Log in</Link>
+                </div>
+
+                <div className="p-2">
+                  <Link to="/register">Get Started</Link>
+                </div>
+              </>
+            ))}
+          {/* <div className="p-2">
             <Link to={"/login"}>Sign in</Link>
           </div>
           <div className="p-2">
             {" "}
             <Link to={"/login"}>Get Started</Link>
-          </div>
+          </div> */}
         </div>
       </div>
       {menuToggle && (
