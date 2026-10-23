@@ -2,6 +2,12 @@ import mongoose from "mongoose";
 
 const enrollmentSchema = new mongoose.Schema(
   {
+    accessType: {
+      type: String,
+      enum: ["free", "paid", "unknown"],
+      default: "unknown",
+    },
+
     // Which user enrolled?
     user: {
       type: mongoose.Schema.Types.ObjectId,

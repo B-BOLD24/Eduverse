@@ -5,7 +5,7 @@ const router = Router();
 const escapeRegex = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 router.get("/", async (req, res) => {
   try {
-    const filter = {};
+    const filter = { status: "published" };
     const search = String(req.query.search ?? "")
       .trim()
       .slice(0, 100);
@@ -115,6 +115,7 @@ router.get("/:courseId", async (req, res) => {
   try {
     const course = await Course.findOne({
       id: req.params.courseId,
+      status: "published",
     }).lean();
 
     if (!course) {

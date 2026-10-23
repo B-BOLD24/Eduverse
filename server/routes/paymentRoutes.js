@@ -24,13 +24,17 @@ router.post("/create-order", requireAuth, async (req, res) => {
 
     // Fetch the course and its price from our database.
     const course = await Course.findOne({ id: courseId }).select(
-      "_id id title price",
+      "_id id title price status",
     );
 
     if (!course) {
       return res.status(404).json({
         message: "Course not found.",
       });
+    }
+
+    if (course.status !== "published") {
+      return res.status(404).json({ message: "Course not found." });
     }
 
     // Free courses should use the normal enrollment endpoint.
@@ -200,16 +204,17 @@ router.post("/verify", requireAuth, async (req, res) => {
     await paymentRecord.save();
 
     // 6. Create the enrollment if it doesn't already exist.
-    const existingEnrollment = await Enrollment.findOne({
+    let existingEnrollment = await Enrollment.findOne({
       user: req.session.userId,
       course: paymentRecord.course,
-    }).select("_id");
+    }).select("_id accessType");
 
     if (!existingEnrollment) {
       try {
-        await Enrollment.create({
+        existingEnrollment = await Enrollment.create({
           user: req.session.userId,
           course: paymentRecord.course,
+          accessType: "paid",
         });
       } catch (error) {
         // Another simultaneous request might have created it.
@@ -217,7 +222,16 @@ router.post("/verify", requireAuth, async (req, res) => {
         if (error.code !== 11000) {
           throw error;
         }
+        existingEnrollment = await Enrollment.findOne({
+          user: req.session.userId,
+          course: paymentRecord.course,
+        }).select("_id accessType");
       }
+    }
+
+    if (existingEnrollment && existingEnrollment.accessType !== "paid") {
+      existingEnrollment.accessType = "paid";
+      await existingEnrollment.save();
     }
 
     return res.json({
@@ -342,16 +356,17 @@ router.post("/webhook", async (req, res) => {
     await paymentRecord.save();
 
     // Ensure the user has an enrollment for this course.
-    const existingEnrollment = await Enrollment.findOne({
+    let existingEnrollment = await Enrollment.findOne({
       user: paymentRecord.user,
       course: paymentRecord.course,
-    }).select("_id");
+    }).select("_id accessType");
 
     if (!existingEnrollment) {
       try {
-        await Enrollment.create({
+        existingEnrollment = await Enrollment.create({
           user: paymentRecord.user,
           course: paymentRecord.course,
+          accessType: "paid",
         });
       } catch (error) {
         // Two requests may try to create the same enrollment.
@@ -359,7 +374,16 @@ router.post("/webhook", async (req, res) => {
         if (error.code !== 11000) {
           throw error;
         }
+        existingEnrollment = await Enrollment.findOne({
+          user: paymentRecord.user,
+          course: paymentRecord.course,
+        }).select("_id accessType");
       }
+    }
+
+    if (existingEnrollment && existingEnrollment.accessType !== "paid") {
+      existingEnrollment.accessType = "paid";
+      await existingEnrollment.save();
     }
 
     return res.status(200).json({

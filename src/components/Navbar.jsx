@@ -70,6 +70,12 @@ export const Navbar = () => {
                   <Link to="/my-learning">My Learning</Link>
                 </div>
 
+                {user.role === "admin" && (
+                  <div className="p-2">
+                    <Link to="/admin">Admin panel</Link>
+                  </div>
+                )}
+
                 <span>{user.name}</span>
 
                 <button onClick={handleLogout}>Log out</button>
@@ -104,6 +110,11 @@ export const Navbar = () => {
               Courses
             </Link>
           </div>
+          {user?.role === "admin" && (
+            <div className="p-2">
+              <Link to="/admin" onClick={closeMenu}>Admin panel</Link>
+            </div>
+          )}
           <div className="p-2  ">
             <Link to={"/courses#categories"} onClick={closeMenu}>
               Categories

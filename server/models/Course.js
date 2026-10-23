@@ -2,6 +2,13 @@ import mongoose from "mongoose";
 
 const courseSchema = new mongoose.Schema(
   {
+    status: {
+      type: String,
+      enum: ["draft", "published", "archived"],
+      default: "draft",
+      index: true,
+    },
+
     id: {
       type: String,
       required: true,

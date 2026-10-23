@@ -17,6 +17,7 @@ const seedCourses = async () => {
           $set: {
             ...course,
             id: id,
+            status: "published",
           },
         },
 

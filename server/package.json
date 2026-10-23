@@ -5,10 +5,12 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "node --test",
     "dev": "nodemon server.js",
     "start": "node server.js",
-    "seed": "node seedCourses.js"
+    "seed": "node seedCourses.js",
+    "provision-admin": "node scripts/provisionAdmin.js",
+    "migrate-admin-data": "node scripts/migrateAdminData.js"
   },
   "keywords": [],
   "author": "",
@@ -27,5 +29,8 @@
     "nodemon": "^3.1.14",
     "npm": "^11.21.1",
     "razorpay": "^2.9.8"
+  },
+  "devDependencies": {
+    "mongodb-memory-server": "^11.2.0"
   }
 }

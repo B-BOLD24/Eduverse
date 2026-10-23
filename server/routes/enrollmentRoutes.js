@@ -50,6 +50,45 @@ router.get("/my", requireAuth, async (req, res) => {
   }
 });
 
+// Enrolled students may continue published or archived courses.
+router.get("/:courseId/content", requireAuth, async (req, res) => {
+  try {
+    const course = await Course.findOne({
+      id: req.params.courseId,
+      status: { $in: ["published", "archived"] },
+    })
+      .select("id title instructor category level duration rating reviews students price originalPrice image featured badge description curriculum status")
+      .lean();
+
+    if (!course) {
+      return res.status(404).json({ message: "Course not found." });
+    }
+
+    const enrollment = await Enrollment.findOne({
+      user: req.session.userId,
+      course: course._id,
+    }).select("progress completedLessons createdAt").lean();
+
+    if (!enrollment) {
+      return res.status(403).json({ message: "You are not enrolled in this course." });
+    }
+
+    return res.json({
+      course: Object.fromEntries(Object.entries(course).filter(([key]) => key !== "_id" && key !== "__v")),
+      enrollment: {
+        enrolled: true,
+        courseId: course.id,
+        progress: enrollment.progress,
+        completedLessons: enrollment.completedLessons,
+        enrolledAt: enrollment.createdAt,
+      },
+    });
+  } catch (error) {
+    console.error("Failed to fetch enrolled course content:", error.message);
+    return res.status(500).json({ message: "Failed to fetch course content." });
+  }
+});
+
 // Mark a lesson as completed and update course progress.
 router.patch("/:courseId/progress", requireAuth, async (req, res) => {
   try {
@@ -178,6 +217,7 @@ router.post("/:courseId", requireAuth, async (req, res) => {
     // Find the course using its public ID, e.g. "react-fundamentals".
     const course = await Course.findOne({
       id: req.params.courseId,
+      status: "published",
     }).select("_id id price");
 
     if (!course) {
@@ -209,6 +249,7 @@ router.post("/:courseId", requireAuth, async (req, res) => {
     const enrollment = await Enrollment.create({
       user: req.session.userId,
       course: course._id,
+      accessType: "free",
     });
 
     return res.status(201).json({

@@ -32,10 +32,9 @@ export default function CourseLearning() {
       setError("");
 
       try {
-        const [courseData, enrollmentData] = await Promise.all([
-          apiFetch(`/api/courses/${encodeURIComponent(courseId)}`),
-          apiFetch(`/api/enrollments/${encodeURIComponent(courseId)}`),
-        ]);
+        const { course: courseData, enrollment: enrollmentData } = await apiFetch(
+          `/api/enrollments/${encodeURIComponent(courseId)}/content`,
+        );
 
         if (cancelled) return;
 
@@ -47,7 +46,7 @@ export default function CourseLearning() {
           return;
         }
 
-        setCourse(courseData.course);
+        setCourse(courseData);
         setEnrollment(enrollmentData);
       } catch (error) {
         if (!cancelled) {

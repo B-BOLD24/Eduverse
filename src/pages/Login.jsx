@@ -1,11 +1,12 @@
 
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { apiFetch } from "../lib/api.js";
 import { useAuth } from "../context/AuthContext.jsx";
 
 export default function Login() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { setUser } = useAuth();
 
   const [email, setEmail] = useState("");
@@ -30,7 +31,11 @@ export default function Login() {
       setUser(data.user);
 
       // Redirect after successful login.
-      navigate("/courses");
+      navigate(
+        location.state?.from?.pathname ??
+          (data.user.role === "admin" ? "/admin" : "/courses"),
+        { replace: true },
+      );
     } catch (error) {
       setError(error.message);
     } finally {
