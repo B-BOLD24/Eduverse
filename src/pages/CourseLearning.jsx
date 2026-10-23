@@ -101,7 +101,7 @@ export default function CourseLearning() {
 
   if (error && !course) {
     return (
-      <p role="alert" className="p-8 text-center text-red-600">
+      <p role="alert" className="p-8 text-center text-red-600 dark:text-red-400">
         Couldn't load the course: {error}
       </p>
     );
@@ -113,30 +113,30 @@ export default function CourseLearning() {
   const completedLessons = enrollment.completedLessons ?? [];
 
   return (
-    <main className="min-h-screen bg-slate-50 px-5 py-10">
+    <main className="min-h-screen bg-slate-50 dark:bg-slate-950 px-5 py-10">
       <div className="mx-auto max-w-4xl">
         <Link
           to={`/courses/${course.id}`}
-          className="text-sm font-medium text-violet-600 hover:text-violet-700"
+          className="text-sm font-medium text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:hover:text-violet-300"
         >
           ← Back to course details
         </Link>
 
-        <h1 className="mt-6 text-3xl font-bold text-slate-900">
+        <h1 className="mt-6 text-3xl font-bold text-slate-900 dark:text-slate-100">
           {course.title}
         </h1>
 
-        <p className="mt-2 text-slate-600">
+        <p className="mt-2 text-slate-600 dark:text-slate-300">
           Continue learning at your own pace.
         </p>
 
         {/* Progress saved in MongoDB */}
-        <section className="mt-8 rounded-2xl border border-slate-200 bg-white p-6">
+        <section className="mt-8 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-6">
           <div className="mb-3 flex justify-between text-sm">
-            <span className="font-semibold text-slate-800">
+            <span className="font-semibold text-slate-800 dark:text-slate-200">
               Course progress
             </span>
-            <span className="text-slate-600">
+            <span className="text-slate-600 dark:text-slate-300">
               {enrollment.progress}% complete
             </span>
           </div>
@@ -147,7 +147,7 @@ export default function CourseLearning() {
             aria-valuemin={0}
             aria-valuemax={100}
             aria-valuenow={enrollment.progress}
-            className="h-3 overflow-hidden rounded-full bg-violet-100"
+            className="h-3 overflow-hidden rounded-full bg-violet-100 dark:bg-violet-900/60"
           >
             <div
               className="h-full rounded-full bg-violet-600 transition-all"
@@ -157,19 +157,19 @@ export default function CourseLearning() {
         </section>
 
         {error && (
-          <p role="alert" className="mt-5 text-sm text-red-600">
+          <p role="alert" className="mt-5 text-sm text-red-600 dark:text-red-400">
             {error}
           </p>
         )}
 
         {/* List the lessons configured for this course */}
         <section className="mt-8 space-y-4">
-          <h2 className="text-xl font-bold text-slate-900">
+          <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">
             Course lessons
           </h2>
 
           {lessons.length === 0 ? (
-            <p className="rounded-xl border border-slate-200 bg-white p-5 text-slate-600">
+            <p className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-5 text-slate-600 dark:text-slate-300">
               Lessons haven't been added to this course yet.
             </p>
           ) : (
@@ -182,13 +182,13 @@ export default function CourseLearning() {
               return (
                 <div
                   key={lessonId}
-                  className="flex flex-col justify-between gap-4 rounded-xl border border-slate-200 bg-white p-5 sm:flex-row sm:items-center"
+                  className="flex flex-col justify-between gap-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-5 sm:flex-row sm:items-center"
                 >
                   <div>
-                    <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
+                    <p className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
                       Lesson {index + 1}
                     </p>
-                    <h3 className="mt-1 font-semibold text-slate-900">
+                    <h3 className="mt-1 font-semibold text-slate-900 dark:text-slate-100">
                       {title}
                     </h3>
                   </div>
@@ -197,7 +197,7 @@ export default function CourseLearning() {
                     type="button"
                     disabled={isCompleted || Boolean(processingLesson)}
                     onClick={() => handleCompleteLesson(lessonId)}
-                    className="rounded-lg bg-violet-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-violet-700 disabled:cursor-not-allowed disabled:bg-slate-300"
+                    className="rounded-lg bg-violet-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-violet-700 disabled:cursor-not-allowed disabled:bg-slate-300 dark:disabled:bg-slate-700 dark:disabled:text-slate-400"
                   >
                     {isCompleted
                       ? "Completed ✓"

@@ -39,20 +39,20 @@ export default function Register() {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-slate-50 px-5 py-12">
-      <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-8 shadow-sm sm:p-10">
+    <main className="flex min-h-screen items-center justify-center bg-slate-50 dark:bg-slate-950 px-5 py-12">
+      <div className="w-full max-w-md rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-8 shadow-sm sm:p-10">
         <Link
           to="/"
-          className="mb-10 inline-block text-2xl font-bold tracking-tight text-slate-900"
+          className="mb-10 inline-block text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100"
         >
-          Eduverse<span className="text-indigo-600">.</span>
+          Eduverse<span className="text-indigo-600 dark:text-indigo-400">.</span>
         </Link>
 
         <div className="mb-8">
-          <h1 className="text-3xl font-bold tracking-tight text-slate-900">
+          <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
             Create your account
           </h1>
-          <p className="mt-2 text-sm leading-6 text-slate-500">
+          <p className="mt-2 text-sm leading-6 text-slate-500 dark:text-slate-400">
             Start learning new skills and take the next step in your journey.
           </p>
         </div>
@@ -61,7 +61,7 @@ export default function Register() {
           <div>
             <label
               htmlFor="name"
-              className="mb-2 block text-sm font-medium text-slate-700"
+              className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300"
             >
               Full name
             </label>
@@ -73,14 +73,14 @@ export default function Register() {
               required
               value={name}
               onChange={(event) => setName(event.target.value)}
-              className="w-full rounded-lg border border-slate-300 px-4 py-3 text-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+              className="w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:bg-slate-900 dark:text-slate-100 dark:focus:ring-indigo-900"
             />
           </div>
 
           <div>
             <label
               htmlFor="email"
-              className="mb-2 block text-sm font-medium text-slate-700"
+              className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300"
             >
               Email address
             </label>
@@ -92,14 +92,14 @@ export default function Register() {
               required
               value={email}
               onChange={(event) => setEmail(event.target.value)}
-              className="w-full rounded-lg border border-slate-300 px-4 py-3 text-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+              className="w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:bg-slate-900 dark:text-slate-100 dark:focus:ring-indigo-900"
             />
           </div>
 
           <div>
             <label
               htmlFor="password"
-              className="mb-2 block text-sm font-medium text-slate-700"
+              className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300"
             >
               Password
             </label>
@@ -113,21 +113,21 @@ export default function Register() {
               required
               value={password}
               onChange={(event) => setPassword(event.target.value)}
-              className="w-full rounded-lg border border-slate-300 px-4 py-3 text-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+              className="w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:bg-slate-900 dark:text-slate-100 dark:focus:ring-indigo-900"
             />
-            <p className="mt-2 text-xs text-slate-500">
+            <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
               Use at least 8 characters.
             </p>
           </div>
 
           {error && (
-            <p role="alert" className="text-sm text-red-600">
+            <p role="alert" className="text-sm text-red-600 dark:text-red-400">
               {error}
             </p>
           )}
 
           {success && (
-            <div className="rounded-lg bg-green-50 p-3 text-sm text-green-700">
+            <div className="rounded-lg bg-green-50 dark:bg-green-950 p-3 text-sm text-green-700 dark:text-green-300">
               Account created successfully! You can now log in.
               <Link
                 to="/login"
@@ -147,11 +147,11 @@ export default function Register() {
           </button>
         </form>
 
-        <p className="mt-7 text-center text-sm text-slate-600">
+        <p className="mt-7 text-center text-sm text-slate-600 dark:text-slate-300">
           Already have an account?{" "}
           <Link
             to="/login"
-            className="font-semibold text-indigo-600 hover:text-indigo-700"
+            className="font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700"
           >
             Log in
           </Link>

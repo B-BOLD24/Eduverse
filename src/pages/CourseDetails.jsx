@@ -248,7 +248,7 @@ export const CourseDetails = () => {
 
   if (courseError) {
     return (
-      <p role="alert" className="p-8 text-center text-red-600">
+      <p role="alert" className="p-8 text-center text-red-600 dark:text-red-400">
         Couldn't load course: {courseError}
       </p>
     );
@@ -271,45 +271,45 @@ export const CourseDetails = () => {
           : "Enroll Now";
 
   return (
-    <div className="bg-violet-50">
+    <div className="bg-violet-50 dark:bg-slate-950">
       <div className="mx-auto max-w-7xl px-6 py-12 lg:px-8">
-        <p className="text-sm font-medium text-violet-700">
+        <p className="text-sm font-medium text-violet-700 dark:text-violet-300">
           Courses / {course.category}
         </p>
 
         <div className="mt-6 grid gap-10 md:grid-cols-2 md:items-center">
           {/* Course information */}
           <div>
-            <span className="rounded-full bg-violet-100 px-3 py-1 text-sm font-semibold text-violet-700">
+            <span className="rounded-full bg-violet-100 dark:bg-violet-900/60 px-3 py-1 text-sm font-semibold text-violet-700 dark:text-violet-300">
               {course.level}
             </span>
 
-            <h1 className="mt-5 text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl lg:text-5xl">
+            <h1 className="mt-5 text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100 sm:text-4xl lg:text-5xl">
               {course.title}
             </h1>
 
-            <p className="mt-4 text-lg leading-8 text-slate-600">
+            <p className="mt-4 text-lg leading-8 text-slate-600 dark:text-slate-300">
               Learn from industry experts and build practical skills with this{" "}
               {course.category.toLowerCase()} course.
             </p>
 
-            <p className="mt-5 text-sm text-slate-600">
+            <p className="mt-5 text-sm text-slate-600 dark:text-slate-300">
               Created by{" "}
-              <span className="font-semibold text-slate-900">
+              <span className="font-semibold text-slate-900 dark:text-slate-100">
                 {course.instructor}
               </span>
             </p>
 
             <div className="mt-4 flex flex-wrap items-center gap-3 text-sm">
-              <span className="font-bold text-amber-600">
+              <span className="font-bold text-amber-600 dark:text-amber-400">
                 {course.rating} ★
               </span>
 
-              <span className="text-slate-600">
+              <span className="text-slate-600 dark:text-slate-300">
                 ({course.reviews.toLocaleString()} reviews)
               </span>
 
-              <span className="text-slate-600">
+              <span className="text-slate-600 dark:text-slate-300">
                 {course.students.toLocaleString()} learners
               </span>
             </div>
@@ -329,19 +329,19 @@ export const CourseDetails = () => {
                 {buttonLabel}
               </button>
 
-              <span className="text-sm text-slate-600">
+              <span className="text-sm text-slate-600 dark:text-slate-300">
                 {course.duration} of learning
               </span>
             </div>
 
             {paymentMessage && (
-              <p role="status" className="mt-3 text-sm text-slate-700">
+              <p role="status" className="mt-3 text-sm text-slate-700 dark:text-slate-300">
                 {paymentMessage}
               </p>
             )}
 
             {enrollmentError && (
-              <p role="alert" className="mt-3 text-sm text-red-600">
+              <p role="alert" className="mt-3 text-sm text-red-600 dark:text-red-400">
                 Couldn't check enrollment: {enrollmentError}
               </p>
             )}
@@ -350,11 +350,11 @@ export const CourseDetails = () => {
             {isEnrolled && (
               <div className="mt-6 max-w-md">
                 <div className="mb-2 flex justify-between text-sm">
-                  <span className="font-medium text-slate-700">
+                  <span className="font-medium text-slate-700 dark:text-slate-300">
                     Your progress
                   </span>
 
-                  <span className="text-slate-600">{enrollment.progress}%</span>
+                  <span className="text-slate-600 dark:text-slate-300">{enrollment.progress}%</span>
                 </div>
 
                 <div
@@ -363,7 +363,7 @@ export const CourseDetails = () => {
                   aria-valuemin={0}
                   aria-valuemax={100}
                   aria-valuenow={enrollment.progress}
-                  className="h-2.5 overflow-hidden rounded-full bg-violet-100"
+                  className="h-2.5 overflow-hidden rounded-full bg-violet-100 dark:bg-violet-900/60"
                 >
                   <div
                     className="h-full rounded-full bg-violet-600 transition-all"
@@ -373,7 +373,7 @@ export const CourseDetails = () => {
                   />
                 </div>
 
-                <p className="mt-2 text-xs text-slate-500">
+                <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
                   Your progress is saved to your account.
                 </p>
               </div>
@@ -381,8 +381,8 @@ export const CourseDetails = () => {
           </div>
 
           {/* Course preview and price */}
-          <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-lg">
-            <div className="h-64 w-full bg-slate-100 sm:h-80">
+          <div className="overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-lg">
+            <div className="h-64 w-full bg-slate-100 dark:bg-slate-800 sm:h-80">
               <img
                 src={course.image}
                 alt={course.title}
@@ -392,22 +392,22 @@ export const CourseDetails = () => {
 
             <div className="p-6">
               <div className="flex items-baseline gap-3">
-                <span className="text-3xl font-bold text-slate-900">
+                <span className="text-3xl font-bold text-slate-900 dark:text-slate-100">
                   ₹{course.price}
                 </span>
 
                 {course.originalPrice > course.price && (
-                  <span className="text-base text-slate-400 line-through">
+                  <span className="text-base text-slate-400 dark:text-slate-500 line-through">
                     ₹{course.originalPrice}
                   </span>
                 )}
               </div>
 
-              <p className="mt-2 text-sm text-slate-500">
+              <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
                 Course access and learning details
               </p>
 
-              <ul className="mt-5 space-y-3 text-sm text-slate-600">
+              <ul className="mt-5 space-y-3 text-sm text-slate-600 dark:text-slate-300">
                 <li>✓ Course level: {course.level}</li>
                 <li>✓ Duration: {course.duration}</li>
                 <li>✓ Learn at your own pace</li>

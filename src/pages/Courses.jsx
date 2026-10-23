@@ -182,7 +182,6 @@ export const Courses = () => {
   });
 
   const [isMobilePanelOpen, setIsMobilePanelOpen] = useState(false);
-  const [isDarkMode, setIsDarkMode] = useState(false);
 
   // Derive the available filter options from database data.
   const categories = [...new Set(allCourses.map((course) => course.category))];
@@ -350,12 +349,10 @@ export const Courses = () => {
   const showingTo = Math.min(currentPage * PAGE_SIZE, pagination.total);
 
   return (
-    <div className={isDarkMode ? "dark" : ""}>
+    <>
       <div className="min-h-screen bg-white text-slate-900 transition-colors dark:bg-slate-950 dark:text-slate-100">
         <CoursesNavbar
           onSearchClick={() => setIsMobilePanelOpen(true)}
-          isDarkMode={isDarkMode}
-          onToggleTheme={() => setIsDarkMode((previous) => !previous)}
         />
 
         <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
@@ -406,7 +403,7 @@ export const Courses = () => {
                     fill="none"
                     stroke="currentColor"
                     strokeWidth="2"
-                    className="h-5 w-5 shrink-0 text-slate-400"
+                    className="h-5 w-5 shrink-0 text-slate-400 dark:text-slate-500"
                   >
                     <circle cx="11" cy="11" r="7" />
                     <path d="m20 20-4-4" />
@@ -472,7 +469,7 @@ export const Courses = () => {
                   role="alert"
                   className="rounded-2xl border border-red-200 px-6 py-10 text-center dark:border-red-900"
                 >
-                  <h2 className="text-lg font-semibold text-red-600">
+                    <h2 className="text-lg font-semibold text-red-600 dark:text-red-400">
                     Couldn't load courses
                   </h2>
 
@@ -614,7 +611,7 @@ export const Courses = () => {
                 fill="none"
                 stroke="currentColor"
                 strokeWidth="2"
-                className="h-5 w-5 shrink-0 text-slate-400"
+                    className="h-5 w-5 shrink-0 text-slate-400 dark:text-slate-500"
               >
                 <circle cx="11" cy="11" r="7" />
                 <path d="m20 20-4-4" />
@@ -646,6 +643,6 @@ export const Courses = () => {
           </aside>
         </div>
       )}
-    </div>
+    </>
   );
 };

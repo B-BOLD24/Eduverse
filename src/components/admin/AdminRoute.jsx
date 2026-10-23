@@ -7,8 +7,8 @@ export default function AdminRoute() {
 
   if (authLoading) {
     return (
-      <main className="grid min-h-screen place-items-center bg-slate-50 px-5">
-        <p className="text-sm font-medium text-slate-600" role="status">
+      <main className="grid min-h-screen place-items-center bg-slate-50 dark:bg-slate-950 px-5">
+        <p className="text-sm font-medium text-slate-600 dark:text-slate-300" role="status">
           Checking your session…
         </p>
       </main>
