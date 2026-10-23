@@ -46,7 +46,7 @@ export default function Login() {
   return (
     <main className="mx-auto max-w-md px-6 py-16">
       <h1 className="mb-2 text-3xl font-bold">Welcome back</h1>
-      <p className="mb-8 text-gray-500">
+      <p className="mb-8 text-gray-500 dark:text-slate-400">
         Log in to continue learning on Eduverse.
       </p>
 
@@ -62,7 +62,7 @@ export default function Login() {
             required
             value={email}
             onChange={(event) => setEmail(event.target.value)}
-            className="w-full rounded-lg border border-gray-300 px-4 py-3"
+            className="w-full rounded-lg border border-gray-300 dark:border-slate-700 bg-white px-4 py-3 text-slate-900 dark:bg-slate-900 dark:text-slate-100"
           />
         </div>
 
@@ -80,12 +80,12 @@ export default function Login() {
             required
             value={password}
             onChange={(event) => setPassword(event.target.value)}
-            className="w-full rounded-lg border border-gray-300 px-4 py-3"
+            className="w-full rounded-lg border border-gray-300 dark:border-slate-700 bg-white px-4 py-3 text-slate-900 dark:bg-slate-900 dark:text-slate-100"
           />
         </div>
 
         {error && (
-          <p role="alert" className="text-sm text-red-600">
+          <p role="alert" className="text-sm text-red-600 dark:text-red-400">
             {error}
           </p>
         )}
@@ -93,7 +93,7 @@ export default function Login() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full rounded-lg bg-black px-4 py-3 font-medium text-white disabled:opacity-60"
+          className="w-full rounded-lg bg-black px-4 py-3 font-medium text-white disabled:opacity-60 dark:bg-violet-600 dark:hover:bg-violet-700"
         >
           {loading ? "Logging in..." : "Log in"}
         </button>

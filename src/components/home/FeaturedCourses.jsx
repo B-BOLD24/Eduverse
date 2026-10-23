@@ -48,22 +48,22 @@ export const FeaturedCourses = () => {
       {/* Section heading */}
       <div className="mb-8 flex items-end justify-between gap-4">
         <div>
-          <p className="text-sm font-semibold uppercase tracking-wide text-violet-600">
+          <p className="text-sm font-semibold uppercase tracking-wide text-violet-600 dark:text-violet-400">
             Keep Learning
           </p>
 
-          <h2 className="mt-2 text-3xl font-bold tracking-tight text-slate-900">
+          <h2 className="mt-2 text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
             Featured Courses
           </h2>
 
-          <p className="mt-2 text-slate-600">
+          <p className="mt-2 text-slate-600 dark:text-slate-300">
             Explore courses selected to help you grow.
           </p>
         </div>
 
         <Link
           to="/courses"
-          className="shrink-0 rounded-lg px-3 py-2 font-semibold text-violet-600 transition hover:bg-violet-50"
+          className="shrink-0 rounded-lg px-3 py-2 font-semibold text-violet-600 dark:text-violet-400 transition hover:bg-violet-50 dark:hover:bg-violet-950"
         >
           View all courses →
         </Link>
@@ -71,11 +71,11 @@ export const FeaturedCourses = () => {
 
       {/* Loading, error, or featured courses */}
       {loading ? (
-        <p className="py-10 text-center text-slate-600">
+        <p className="py-10 text-center text-slate-600 dark:text-slate-300">
           Loading featured courses...
         </p>
       ) : error ? (
-        <p role="alert" className="py-10 text-center text-red-600">
+        <p role="alert" className="py-10 text-center text-red-600 dark:text-red-400">
           Couldn't load featured courses: {error}
         </p>
       ) : featuredCourses.length > 0 ? (
@@ -85,7 +85,7 @@ export const FeaturedCourses = () => {
           ))}
         </div>
       ) : (
-        <p className="py-10 text-center text-slate-600">
+        <p className="py-10 text-center text-slate-600 dark:text-slate-300">
           No featured courses available right now.
         </p>
       )}

@@ -12,6 +12,24 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>tailwind2</title>
+    <script>
+      (() => {
+        try {
+          const savedTheme = localStorage.getItem("eduverse-theme");
+          const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+          const useDark = savedTheme === "dark" || (savedTheme !== "light" && prefersDark);
+          document.documentElement.classList.toggle("dark", useDark);
+          document.documentElement.style.colorScheme = useDark ? "dark" : "light";
+        } catch {
+          const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+          document.documentElement.classList.toggle(
+            "dark",
+            prefersDark,
+          );
+          document.documentElement.style.colorScheme = prefersDark ? "dark" : "light";
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

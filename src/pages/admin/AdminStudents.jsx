@@ -49,25 +49,25 @@ export default function AdminStudents() {
     <>
       <PageHeading title="Students" description="Search student accounts and review their course access summaries." />
       <div className="mb-5 max-w-xl">
-        <label htmlFor="student-search" className="mb-2 block text-sm font-semibold text-slate-700">Search students</label>
-        <input id="student-search" type="search" value={search} onChange={(event) => updateSearch(event.target.value)} placeholder="Name or email" className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none transition placeholder:text-slate-400 focus:border-violet-400 focus:ring-4 focus:ring-violet-100" />
+        <label htmlFor="student-search" className="mb-2 block text-sm font-semibold text-slate-700 dark:text-slate-300">Search students</label>
+        <input id="student-search" type="search" value={search} onChange={(event) => updateSearch(event.target.value)} placeholder="Name or email" className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-4 py-3 text-sm outline-none transition placeholder:text-slate-400 focus:border-violet-400 focus:ring-4 focus:ring-violet-100 dark:focus:ring-violet-900" />
       </div>
       {error && <div className="mb-5"><Alert>{error}</Alert></div>}
       {loading ? <LoadingState label="Loading students…" /> : data?.items?.length ? (
-        <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <section className="overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-sm">
           <div className="overflow-x-auto">
             <table className="w-full min-w-[760px] text-left text-sm">
-              <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
+              <thead className="bg-slate-50 dark:bg-slate-950 text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">
                 <tr><th className="px-5 py-4 font-semibold">Student</th><th className="px-5 py-4 font-semibold">Registered</th><th className="px-5 py-4 font-semibold">Enrollments</th><th className="px-5 py-4 font-semibold">Access summary</th><th className="px-5 py-4" /></tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
                 {data.items.map((student) => (
-                  <tr key={student.id} className="hover:bg-slate-50/70">
-                    <td className="px-5 py-4"><p className="font-semibold text-slate-900">{student.name}</p><p className="mt-1 text-xs text-slate-500">{student.email}</p></td>
-                    <td className="px-5 py-4 text-slate-600">{formatDate(student.createdAt)}</td>
-                    <td className="px-5 py-4 font-medium text-slate-700">{student.enrollmentCount}</td>
-                    <td className="px-5 py-4"><div className="flex flex-wrap items-center gap-2"><StatusBadge tone={summaryTone(student.accessSummary)}>{student.accessSummary}</StatusBadge>{student.accessCounts?.unknown > 0 && <span className="text-xs text-amber-700">{student.accessCounts.unknown} unresolved</span>}</div></td>
-                    <td className="px-5 py-4 text-right"><Link to={`/admin/students/${encodeURIComponent(student.id)}`} className="font-semibold text-violet-700 hover:text-violet-900">View details</Link></td>
+                  <tr key={student.id} className="hover:bg-slate-50/70 dark:hover:bg-slate-800/70">
+                    <td className="px-5 py-4"><p className="font-semibold text-slate-900 dark:text-slate-100">{student.name}</p><p className="mt-1 text-xs text-slate-500 dark:text-slate-400">{student.email}</p></td>
+                    <td className="px-5 py-4 text-slate-600 dark:text-slate-300">{formatDate(student.createdAt)}</td>
+                    <td className="px-5 py-4 font-medium text-slate-700 dark:text-slate-300">{student.enrollmentCount}</td>
+                    <td className="px-5 py-4"><div className="flex flex-wrap items-center gap-2"><StatusBadge tone={summaryTone(student.accessSummary)}>{student.accessSummary}</StatusBadge>{student.accessCounts?.unknown > 0 && <span className="text-xs text-amber-700 dark:text-amber-300">{student.accessCounts.unknown} unresolved</span>}</div></td>
+                    <td className="px-5 py-4 text-right"><Link to={`/admin/students/${encodeURIComponent(student.id)}`} className="font-semibold text-violet-700 dark:text-violet-300 hover:text-violet-900 dark:hover:text-violet-300">View details</Link></td>
                   </tr>
                 ))}
               </tbody>
